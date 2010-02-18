@@ -1,4 +1,5 @@
 (ns cljaws.core
+  (:use (cljaws helpers))
   (:import 
    (com.xerox.amazonws.sqs2 QueueService MessageQueue Message SQSUtils)
    (com.xerox.amazonws.ec2 Jec2 ImageDescription)
@@ -14,8 +15,6 @@
 	 *s3-service*
 	 *sdb-service*
 	 *sdb-domain*)
-
-
 ;;
 ;; Generic aws
 ;;
@@ -24,7 +23,6 @@
   `(binding [*aws-id* ~id
 	     *aws-key* ~key]
      ~@body))
-
 
 (defn- read-properties [file-name]
   (into {} 
@@ -146,7 +144,7 @@
     (.describeImages ec2 '())))
 
 ;; 
-;; Simple Queue Servie / SQS
+;; Simple Queue Service / SQS
 ;;
 
 (defmacro with-sqs-queue [name & body]
@@ -171,32 +169,15 @@
   (.sendMessage *sqs-queue* message))
 
 
-(defmacro do-until-timeout [timeout & body]
-  `(loop [end-time# (+ (System/currentTimeMillis) (* 1000 ~timeout))
-	  time-skip# 500]
-     (let [value# (do ~@body)
-	   now# (System/currentTimeMillis)]
-       (or value#
-	   (if (> now# end-time#)
-	     nil
-	     (do 
-	       (let [sleep-time# (max 500 
-				      (min time-skip# 
-					   (- end-time# now#)))]
-		 (println "sleep " sleep-time#)
-		 (Thread/sleep sleep-time#)
-		 (recur end-time#
-			(if (< time-skip# 29999) 
-			  (* 2 time-skip#) 
-			  time-skip#)))))))))
-  
 (defn dequeue 
-  ([] (dequeue (* 365 24 3600 1000))) ;; wait a year as default
+  "Dequeue a message, return false if timeout"
+  ([] (dequeue (* 365 24 3600 1000))) ;; wait a year as default, sortof blocking
   ([seconds]
-     (let [msg (do-until-timeout
-		(* 1000 seconds)
+     (let [msg (while-or-timeout 
+		nil? seconds
 		(.receiveMessage *sqs-queue*))]
-       (if msg (do
-		 (.deleteMessage *sqs-queue* msg)
-		 (.getMessageBody msg))))))
+       (and (not (false? msg)) 
+	    (do
+	      (.deleteMessage *sqs-queue* msg)
+	      (.getMessageBody msg))))))
 
