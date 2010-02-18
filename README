@@ -8,8 +8,11 @@ FIXME: write
 
 ## Installation
 
-FIXME: write
+
+You must create a file "aws.properties" containing your AWS Id and Secret Key!
+
 
 ## License
 
-FIXME: write
+MIT
+

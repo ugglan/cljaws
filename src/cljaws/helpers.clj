@@ -1,6 +1,5 @@
 (ns cljaws.helpers)
 
-
 (defmacro while-or-timeout 
   "Repeat body until it returns a value that satisfies pred. Returns
 false if no value satisfies pred within timeout seconds."
