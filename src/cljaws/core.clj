@@ -16,6 +16,6 @@
 	  (.load (java.io.FileInputStream. file-name)))))
 	
 (defmacro with-aws [& body]
-  (let [{id "id" key "key"} (read-properties "aws.properties")]
+  (let [{:strs [id key]} (read-properties "aws.properties")]
     `(with-aws-keys ~id ~key ~@body)))
 
