@@ -1,9 +1,16 @@
 (ns cljaws.helpers)
 
 (defmacro while-or-timeout 
-  "Repeat body until it returns a value that satisfies pred. Returns
-false if no value satisfies pred within timeout seconds."
+
+  "Repeats body until it returns a value that satisfies pred. Returns
+false if no value satisfies pred within timeout seconds.
+First retry will happen after 0.5s, each succeeding retry will happen 
+after twice as long up to a maximum of 32s, except for the last retry 
+which will happen at the timeout-time, but not earlier than 0.5s after 
+the previous attempt."
+
   [pred timeout & body]
+
   `(loop [end-time# (+ (System/currentTimeMillis) (* 1000 ~timeout))
 	  time-skip# 500]
      (let [value# (do ~@body)
