@@ -2,6 +2,8 @@
   (:use (cljaws s3 core core-test helpers) :reload-all)
   (:use [clojure.test]))
 
+(def timeout-seconds 15)
+
 (deftest buckets-test
   (let [bucket-name (make-unique-name "bucket")]
     (with-aws 
@@ -11,17 +13,17 @@
 	  (let [result (list-buckets)]
 	    (is (seq? result))
 	    (is (pos? (count result))
-		"Should get list of available bucketsimages")
+		"Should get list of available buckets")
 	    (is (string? (first result))))
 	
 	  (is (while-or-timeout 
-	       false? 5 
+	       false? timeout-seconds 
 	       (contains-string? (list-buckets) bucket-name)))
 
 	  (put-object "testing" "Hello World!")
 
 	  (is (while-or-timeout
-	       false? 10
+	       false? timeout-seconds
 	       (= "Hello World!" (get-object-as-string "testing"))))
 
 	  (let [content (list-bucket)]
@@ -31,11 +33,11 @@
 	  (delete-object "testing")
 
 	  (is (while-or-timeout 
-	       false? 5
+	       false? timeout-seconds
 	       (zero? (count (list-bucket)))))
 
 	  (delete-bucket))
 
 	(is (while-or-timeout
-	     false? 5 
+	     false? timeout-seconds
 	     (not (contains-string? (list-buckets) bucket-name))))))))
