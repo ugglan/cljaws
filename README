@@ -3,7 +3,7 @@
 
 
 cljaws is a relatively thin wrapper for the typica and jets3t AWS
-libraries. In it's current state it is very sparse and incomplete,
+libraries. In its current state it is very sparse and incomplete,
 functionality will be added on a "need it!"-basis.
 
 My aim is to have something that is easy to use and feels somewhat
@@ -15,7 +15,12 @@ binding/with-happy. We'll see.
 
 
 
+
 ## Installation
+
+cljaws uses the leiningen build tool, get it at
+http://github.com/technomancy/leiningen if you don't have it!
+
 
 1. Clone the repo
 
@@ -30,12 +35,18 @@ key=XXXXXXXXXXXXXXXXXXXXXXX
 As an alternative to creating aws.properties you can use
 (with-aws-keys ID KEY ....) but I don't recommended it.
 
+Optional 4. Run "lein test"
+
 
 ## Usage 
 
-Example usage:
+I'm trying to keep the test-cases pretty complete, but they might not
+be very readable.
 
-; enqueue the names of all my s3-bucket as a message in queue "bucketlist"
+
+Some example usage:
+
+; enqueue the names of all my s3-buckets as a message in queue "bucketlist"
 (use '(cljaws core s3 sqs))
 
 (with-aws 
