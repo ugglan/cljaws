@@ -17,13 +17,18 @@ binding/with-happy. We'll see.
 
 ## Installation
 
-You must create a file "aws.properties" containing your AWS id and
+1. Clone the repo
+
+2. Fetch dependencies - "lein deps"
+
+3. Create a file "aws.properties" containing your AWS id and
 secret key in normal property file form:
 
 id=XXXXXXXXXXX
 key=XXXXXXXXXXXXXXXXXXXXXXX
 
-
+As an alternative to creating aws.properties you can use
+(with-aws-keys ID KEY ....) but I don't recommended it.
 
 
 ## Usage 
