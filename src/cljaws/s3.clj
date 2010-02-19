@@ -40,8 +40,11 @@ defn delete-bucket []
 
 (defn put-object [key obj]
   (cond 
-   (string? obj) (.putObject *s3-service* *s3-bucket* (S3Object. key obj)))
-  )
+   (string? obj) (.putObject *s3-service* *s3-bucket* (S3Object. key obj))
+   (= java.io.File 
+      (class obj)) (.putObject *s3-service* *s3-bucket*
+			       (doto (S3Object. obj)
+				 (.setKey key)))))
 
 (defn get-object-details [key]
   (bean (.getObjectDetails *s3-service* *s3-bucket* key)))

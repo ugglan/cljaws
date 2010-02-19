@@ -1,26 +1,31 @@
 (ns cljaws.s3-test
   (:use (cljaws s3 core core-test helpers) :reload-all)
-  (:use [clojure.test]))
+  (:use [clojure.test] 
+	[clojure.contrib.duck-streams]))
 
 (def timeout-seconds 15)
+
 
 (deftest buckets-test
   (let [bucket-name (make-unique-name "bucket")]
     (with-aws 
       (with-s3 
+
+	; create bucket
+
 	(with-bucket bucket-name
-	  
-	  (let [result (list-buckets)]
-	    (is (seq? result))
-	    (is (pos? (count result))
-		"Should get list of available buckets")
-	    (is (string? (first result))))
-	
+
+	  ; verify that it exists
+
 	  (is (while-or-timeout 
 	       false? timeout-seconds 
 	       (contains-string? (list-buckets) bucket-name)))
 
+	  ; put a simple textobject
+
 	  (put-object "testing" "Hello World!")
+
+	  ; verify it exists
 
 	  (is (while-or-timeout
 	       false? timeout-seconds
@@ -30,13 +35,42 @@
 	    (is (= 1 (count content)))
 	    (is (= "testing" (:key (first content)))))
 
+
+	  ; create a file and put it
+
+	  (let [file (java.io.File/createTempFile "CLJAWS_test" ".html")
+		test-content "<html><head><title>Hello</title></head>
+<body><h1>Hello world!</h1></body></html>"]
+	    
+	    (spit file test-content)
+
+	    (put-object "test.html" file)
+
+	  ; verify it exists
+	    
+	    (is (while-or-timeout
+		 false? timeout-seconds
+		 (= "test.html" (:key (get-object-details "test.html")))))
+
+	    (let [content (list-bucket)]
+	      (is (= 2 (count content))))
+
+	    ; delete them
+
+	    (delete-object "test.html"))
 	  (delete-object "testing")
+	  
+	  ; verify they're gone
 
 	  (is (while-or-timeout 
 	       false? timeout-seconds
 	       (zero? (count (list-bucket)))))
 
+	  ; delete bucket
+
 	  (delete-bucket))
+
+	; verify the bucket is gone
 
 	(is (while-or-timeout
 	     false? timeout-seconds
