@@ -1,17 +1,21 @@
 
 # cljaws
 
-
 cljaws is a relatively thin wrapper for the typica and jets3t AWS
 libraries. In its current state it is very sparse and incomplete,
 functionality will be added on a "need it!"-basis.
 
-My aim is to have something that is easy to use and feels somewhat
-clojuresque, while having no ambitions to completely hide the innards
-of the parent libraries.
+My aim is to have something that makes it easy and fun (for me!) to
+use all of the Amazon Web Services in a consistent and somewhat
+clojuresque manner.
+
+I have no ambitions to completely hide the innards of the parent
+libraries because sometimes I might want to work with the
+Java-objects.
 
 The API will very likely change, at the moment it might be a bit
-binding/with-happy. We'll see.
+binding/with-happy and it's a bit inconsistent in when it will return
+a Java-object and when it will wrap it in (bean ..).
 
 
 
@@ -41,10 +45,8 @@ Optional 4. Run "lein test"
 ## Usage 
 
 I'm trying to keep the test-cases pretty complete, but they might not
-be very readable.
+be very readable so here is some example usage:
 
-
-Some example usage:
 
 ; enqueue the names of all my s3-buckets as a message in queue "bucketlist"
 (use '(cljaws core s3 sqs))
