@@ -1,0 +1,8 @@
+# Copy this template to aws.properties and edit the properties
+# below to your access credentials.
+
+# Sign up to Amazon Web Services at http://aws.amazon.com/ if
+# you don't have any credentials yet.
+
+id=ACCESS-KEY-ID
+key=SECRET-ACCESS-KEY

@@ -29,12 +29,8 @@ http://github.com/technomancy/leiningen if you don't have it!
 
 2. Fetch dependencies - `lein deps`
 
-3. Create a file aws.properties containing your AWS id and
-secret key in normal property file form:
-
-    id=XXXXXXXXXXX
-
-    key=XXXXXXXXXXXXXXXXXXXXXXX
+3. Copy the aws.properties.template file to aws.properties and
+   edit it to contain your own credentials.
 
 As an alternative to creating aws.properties you can use
 `(with-aws-keys ID KEY ....)` but I don't recommended it.
