@@ -75,3 +75,15 @@
 	(is (while-or-timeout
 	     false? timeout-seconds
 	     (not (contains-string? (list-buckets) bucket-name))))))))
+
+(deftest fail-test
+    (let [bucket-name (make-unique-name "bucket")]
+    (with-aws 
+      (with-s3
+	(with-bucket bucket-name
+	  (is (nil? (delete-object "This_doesnt_exist")))
+	  (is (nil? (get-object-details "This_doesnt_exits_either")))
+	  (is (nil? (get-object "This_doesnt_exits_either")))
+	  (is (nil? (get-object-as-string "This_doesnt_exits_either")))
+	  (is (nil? (get-object-as-stream "This_doesnt_exits_either")))
+	  (delete-bucket))))))

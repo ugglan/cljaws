@@ -4,7 +4,8 @@
    (org.jets3t.service.security AWSCredentials)
    (org.jets3t.service.impl.rest.httpclient RestS3Service)
    (org.jets3t.service.model S3Object)
-   (org.jets3t.service.utils ServiceUtils)))
+   (org.jets3t.service.utils ServiceUtils)
+   (org.jets3t.service S3ServiceException)))
 
 ;;
 ;; Simple Storage Service / S3
@@ -46,26 +47,31 @@ defn delete-bucket []
 			       (doto (S3Object. obj)
 				 (.setKey key)))))
 
-(defn get-object-details [key]
-  (bean (.getObjectDetails *s3-service* *s3-bucket* key)))
 
+(defn get-object-details [key]
+  (try (bean (.getObjectDetails *s3-service* *s3-bucket* key))
+       (catch S3ServiceException e
+	 nil)))
 
 (defn get-object [key]
-  (.getObject *s3-service* *s3-bucket* key))
+  (try (.getObject *s3-service* *s3-bucket* key)
+       (catch S3ServiceException e
+	 nil)))
 
 (defn get-object-as-stream [key]
-  (.getDataInputStream (get-object key)))
+  (when-let [obj (get-object key)] 
+    (.getDataInputStream obj)))
 
 (defn get-object-as-string 
   "Get object as utf-8 encoded string, probably not a good idea on big objects."
   [key]
-  (let [baos (java.io.ByteArrayOutputStream.)
-	is (get-object-as-stream key)]
-    (loop [b (.read is)]
-      (if (neg? b)
-	(String. (.toByteArray baos) "UTF-8")
-	(do (.write baos b)
-	    (recur (.read is)))))))
+  (when-let [is (get-object-as-stream key)]
+    (let [baos (java.io.ByteArrayOutputStream.)]
+      (loop [b (.read is)]
+	(if (neg? b)
+	  (String. (.toByteArray baos) "UTF-8")
+	  (do (.write baos b)
+	      (recur (.read is))))))))
 
 (defn delete-object [key]
   (.deleteObject *s3-service* *s3-bucket* key))
