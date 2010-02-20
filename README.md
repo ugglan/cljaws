@@ -51,8 +51,8 @@ be very readable so here is some example usage:
     ; enqueue the names of all my s3-buckets as a message in queue "bucketlist"
     (use '(cljaws core s3 sqs))
     
-    (with-aws 
-      (with-sqs-queue "bucketlist" 
+    (with-aws sqs
+      (with-queue "bucketlist" 
         (doseq [bucket-name (with-s3 (list-buckets))]
     	   (enqueue bucket-name))))
     
@@ -60,36 +60,34 @@ be very readable so here is some example usage:
     (use '(cljaws sdb helpers))
     
     ; create sdb domain
-    (with-aws (with-sdb (create-domain :workspace)))
+    (with-aws sdb (create-domain :workspace))
     
     ; dequeue messages sent above and add each one as a row in the sdb-domain
-    (with-aws 
-      (with-sqs-queue "bucketlist" 
-        (with-sdb
+    (with-aws sdb sqs
+      (with-queue "bucketlist" 
     	(with-domain :workspace
     	  (doseq [msg (take-while (comp not false?) (repeatedly #(dequeue 5)))]
-    		 (add-attributes msg {:type "testing bucket"}))))))
+    		 (add-attributes msg {:type "testing bucket"})))))
     
     ; select all rows and attibutes from domain
-    (with-aws (with-sdb (select "* from workspace")))
+    (with-aws sdb (select "* from workspace"))
     
     
     ; Upload an image and a string to mybucket. Then make the string
     ; publicly available on http://mybucket.s3.amazonaws.com/foo.txt
     (use 'cljaws.s3)
-    (with-aws 
-      (with-s3 
-        (with-bucket "mybucket" 
-          (put-object "secretfile.jpg" (java.io.File. "cute.jpg"))
-          (put-object "foo.txt" "hello world!")
-          (grant "foo.txt" {:all-users :read}))))
+    (with-aws s3
+      (with-bucket "mybucket" 
+        (put-object "secretfile.jpg" (java.io.File. "cute.jpg"))
+        (put-object "foo.txt" "hello world!")
+        (grant "foo.txt" {:all-users :read})))
     
     
 ## Commands
     
-    (with-aws &body) 
+    (with-aws services?+ &body) 
         
-    Read credentials from aws.properties
+    Read credentials from aws.properties and connect to services
     
     
     (with-s3 &body) 
@@ -100,7 +98,7 @@ be very readable so here is some example usage:
     Connect to ec2-service
     
     
-    (with-sqs-queue queue-name &body) 
+    (with-sqs &body) 
     Connect to sqs-service and queue
     
     

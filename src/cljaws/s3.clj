@@ -38,6 +38,7 @@
   (let [contents (.listObjects *s3-service* *s3-bucket*)]
     (map bean contents)))
 
+(declare bucket-acl*)
 (defn- put-object* 
   "Update s3-object with acl of parent bucket and then put it."
   [obj]

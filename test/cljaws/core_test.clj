@@ -1,7 +1,6 @@
 (ns cljaws.core-test
-  (:use (cljaws core) :reload-all)
+  (:use (cljaws core s3 sdb) :reload-all)
   (:use [clojure.test]))
-
 
 ;
 ; Test helpers
@@ -25,3 +24,30 @@
        result#)))
 
 
+;
+;
+;
+
+
+(defmacro unbound? [symbol]
+  `(= :unbound 
+      (try ~symbol
+	   (catch IllegalStateException e# :unbound))))
+
+
+(deftest compact-style-test
+  (is (unbound? *aws-id*))
+  (with-aws
+    (is (string? *aws-id*)))
+  
+  (is (unbound? cljaws.s3/*s3-service*))
+
+  (with-aws s3
+    (is (not (unbound? cljaws.s3/*s3-service*))))
+  
+  (is (unbound? cljaws.s3/*s3-service*))
+  (is (unbound? cljaws.sdb/*sdb-service*))
+  
+  (with-aws s3 sdb 
+    (is (not (unbound? cljaws.s3/*s3-service*)))
+    (is (not (unbound? cljaws.sdb/*sdb-service*)))))

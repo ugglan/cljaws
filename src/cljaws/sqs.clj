@@ -8,14 +8,19 @@
 ;; Simple Queue Service / SQS
 ;;
 
-(declare *sqs-queue*)
+(declare *sqs-queue*
+	 *sqs-service*)
 
-(defmacro with-sqs-queue [name & body]
-  `(binding [*sqs-queue* (.getOrCreateMessageQueue (QueueService. *aws-id* *aws-key* true) ~name)]
+(defmacro with-sqs [& body]
+  `(binding [*sqs-service* (QueueService. *aws-id* *aws-key* true)]
      ~@body))
 
-(defn list-sqs-queues 
-  ([] (list-sqs-queues nil))
+(defmacro with-queue [name & body]
+  `(binding [*sqs-queue* (.getOrCreateMessageQueue *sqs-service* ~name)]
+     ~@body))
+
+(defn list-queues 
+  ([] (list-queues nil))
   ([prefix] 
      (map #(subs % (inc (.lastIndexOf % "/")))
 	  (map (comp str (memfn getUrl))
