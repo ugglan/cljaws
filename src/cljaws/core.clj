@@ -23,10 +23,7 @@
   [& body]
   (let [{:strs [id key]} (read-properties *aws-properties-file*)
 	[services body] (split-with keyword? body)
-	body (loop [res `(do ~@body)
-		    s (reverse services)]
-	       (if (empty? s) res
-		   (recur (list (symbol (str "with-" (name (first s)))) res)
-			  (next s))))]
+	body (reduce #(list (symbol (str "with-" (name %2))) %1)
+		     (cons `(do ~@body) services))]
     `(with-aws-keys ~id ~key ~body)))
 
