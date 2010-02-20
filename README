@@ -70,9 +70,19 @@ be very readable so here is some example usage:
 	  (doseq [msg (take-while (comp not false?) (repeatedly #(dequeue 5)))]
 		 (add-attributes msg {:type "testing bucket"}))))))
 
-;select all rows and attibutes from domain
+; select all rows and attibutes from domain
 (with-aws (with-sdb (select "* from workspace")))
 
+
+; Upload an image and a string to mybucket. Then make the string
+; publicly available on http://mybucket.s3.amazonaws.com/foo.txt
+(use 'cljaws.s3)
+(with-aws 
+  (with-s3 
+    (with-bucket "mybucket" 
+      (put-object "secretfile.jpg" (java.io.File. "cute.jpg"))
+      (put-object "foo.txt" "hello world!")
+      (grant "foo.txt" {:all-users :read}))))
 
 
 ## Commands
