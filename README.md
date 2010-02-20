@@ -37,7 +37,7 @@ secret key in normal property file form:
     key=XXXXXXXXXXXXXXXXXXXXXXX
 
 As an alternative to creating aws.properties you can use
-(with-aws-keys ID KEY ....) but I don't recommended it.
+`(with-aws-keys ID KEY ....)` but I don't recommended it.
 
 Optional 4. Run `lein test`
 
