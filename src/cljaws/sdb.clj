@@ -10,13 +10,6 @@
 
 (declare *sdb-service* *sdb-domain*)
 
-(defn to-str 
-  "turn keyword/symbol into string without prepending : or ', or
-just pass through if already string"
-  [s] (if (string? s) 
-	s
-	(name s)))  
-
 
 (defmacro with-domain [name & body]
   `(binding [*sdb-domain* (.getDomain *sdb-service* (to-str ~name))]

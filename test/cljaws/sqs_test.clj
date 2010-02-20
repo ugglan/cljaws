@@ -52,7 +52,7 @@
       (doall
        (for [i (range (count names))]
 	 (let [q (nth names i)]
-	   (with-queue q 
+	   (with-queue (keyword q) 
 	     (is (= (str "Hello " i q)
 		    (dequeue 10))
 		 "Verify that we get one message from each queue within 10 secs")

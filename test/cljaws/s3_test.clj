@@ -37,7 +37,7 @@
 	    
 	    (spit file test-content)
 
-	    (put-object "test.html" file)
+	    (put-object :test.html file)
 
 	  ; verify it exists
 	    (is (while-or-timeout
@@ -64,10 +64,10 @@
 	     false? timeout-seconds
 	     (not (contains-string? (list-buckets) bucket-name)))))))
 
-(deftest fail-test
+(deftest fail-and-keyword-test
     (let [bucket-name (make-unique-name "bucket")]
     (with-aws :s3
-      (with-bucket bucket-name
+      (with-bucket (keyword bucket-name)
 	(is (nil? (delete-object "This_doesnt_exist")))
 	(is (nil? (get-object-details "This_doesnt_exits_either")))
 	(is (nil? (get-object "This_doesnt_exits_either")))

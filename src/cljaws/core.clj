@@ -1,6 +1,18 @@
 (ns cljaws.core)
 
 (declare *aws-id* *aws-key*)
+
+
+;;
+;; Common
+
+(defn to-str 
+  "turn keyword/symbol into string without prepending : or ', or
+just pass through if already string"
+  [s] (if (string? s) 
+	s
+	(name s)))  
+
 ;;
 ;; Generic aws
 ;;

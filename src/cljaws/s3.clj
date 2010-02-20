@@ -27,7 +27,7 @@
 
 (defmacro with-bucket 
   [bucket & body]
-  `(binding [*s3-bucket* (.getOrCreateBucket *s3-service* ~bucket)]
+  `(binding [*s3-bucket* (.getOrCreateBucket *s3-service* (to-str ~bucket))]
      ~@body))
 
 (defn delete-bucket []
@@ -49,19 +49,20 @@
   "Put a key-object pair into the active bucket. Object can be a
 string or a File. The put object will inherit the access control list
 of the bucket."
-  (cond 
-   (string? obj) (put-object* (S3Object. key obj))
-   (= java.io.File 
-      (class obj)) (put-object* (doto (S3Object. obj) (.setKey key)))
-   :else (throw (IllegalArgumentException. 
-		 (str "Can't put object of type " (class obj))))))
+  (let [key (to-str key)]
+    (cond 
+     (string? obj) (put-object* (S3Object. key obj))
+     (= java.io.File 
+	(class obj)) (put-object* (doto (S3Object. obj) (.setKey key)))
+	:else (throw (IllegalArgumentException. 
+		      (str "Can't put object of type " (class obj)))))))
 
 (defn get-object-details [key]
-  (try (bean (.getObjectDetails *s3-service* *s3-bucket* key))
+  (try (bean (.getObjectDetails *s3-service* *s3-bucket* (to-str key)))
        (catch S3ServiceException e nil)))
 
 (defn get-object [key]
-  (try (.getObject *s3-service* *s3-bucket* key)
+  (try (.getObject *s3-service* *s3-bucket* (to-str key))
        (catch S3ServiceException e nil)))
 
 (defn get-object-as-stream [key]
@@ -80,7 +81,7 @@ of the bucket."
 	      (recur (.read is))))))))
 
 (defn delete-object [key]
-  (.deleteObject *s3-service* *s3-bucket* key))
+  (.deleteObject *s3-service* *s3-bucket* (to-str key)))
 
 
 ; access control
@@ -106,7 +107,7 @@ of the bucket."
       :write-acp Permission/PERMISSION_WRITE_ACP 
       :revoke-all :revoke-all})
 
-(defn make-grant [[grantee permission]]
+(defn- make-grant [[grantee permission]]
   (let [g (parse-grantee grantee) 
 	p (parse-permission permission)]
     (if (nil? g) (throw (IllegalArgumentException. 
@@ -144,6 +145,6 @@ Example: (grant {:all-users :read})
   
   ([key grants]
      (when-let [obj (get-object key)]
-       (let [acl (.getObjectAcl *s3-service* *s3-bucket* key)]
+       (let [acl (.getObjectAcl *s3-service* *s3-bucket* (to-str key))]
 	 (.setAcl obj (update-acl acl grants)))
        (.putObject *s3-service* *s3-bucket* obj))))

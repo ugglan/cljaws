@@ -16,7 +16,7 @@
      ~@body))
 
 (defmacro with-queue [name & body]
-  `(binding [*sqs-queue* (.getOrCreateMessageQueue *sqs-service* ~name)]
+  `(binding [*sqs-queue* (.getOrCreateMessageQueue *sqs-service* (to-str ~name))]
      ~@body))
 
 (defn list-queues 
