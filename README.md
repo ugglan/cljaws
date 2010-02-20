@@ -29,10 +29,11 @@ http://github.com/technomancy/leiningen if you don't have it!
 
 2. Fetch dependencies - `lein deps`
 
-3. Create a file `aws.properties` containing your AWS id and
+3. Create a file aws.properties containing your AWS id and
 secret key in normal property file form:
 
     id=XXXXXXXXXXX
+
     key=XXXXXXXXXXXXXXXXXXXXXXX
 
 As an alternative to creating aws.properties you can use
@@ -115,7 +116,7 @@ be very readable so here is some example usage:
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
  files (the "Software"), to deal in the Software without
- restriction, including without limitation the rights to use,
+ restriction, including wit hout limitation the rights to use,
  copy, modify, merge, publish, distribute, sublicense, and/or sell
  copies of the Software, and to permit persons to whom the
  Software is furnished to do so, subject to the following
