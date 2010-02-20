@@ -22,11 +22,11 @@
   {:arglists '([service?+  & body])}  
   [& body]
   (let [{:strs [id key]} (read-properties *aws-properties-file*)
-	[withs body] (split-with #(contains? #{'s3 'ec2 'sdb 'sqs} %) body)
+	[services body] (split-with keyword? body)
 	body (loop [res `(do ~@body)
-		    w (reverse withs)]
-	       (if (empty? w) res
-		   (recur (list (symbol (str "with-" (first w))) res)
-			  (next w))))]
+		    s (reverse services)]
+	       (if (empty? s) res
+		   (recur (list (symbol (str "with-" (name (first s)))) res)
+			  (next s))))]
     `(with-aws-keys ~id ~key ~body)))
 

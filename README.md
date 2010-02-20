@@ -51,7 +51,7 @@ be very readable so here is some example usage:
     ; enqueue the names of all my s3-buckets as a message in queue "bucketlist"
     (use '(cljaws core s3 sqs))
     
-    (with-aws sqs
+    (with-aws :sqs
       (with-queue "bucketlist" 
         (doseq [bucket-name (with-s3 (list-buckets))]
     	   (enqueue bucket-name))))
@@ -60,56 +60,35 @@ be very readable so here is some example usage:
     (use '(cljaws sdb helpers))
     
     ; create sdb domain
-    (with-aws sdb (create-domain :workspace))
+    (with-aws :sdb (create-domain :workspace))
     
     ; dequeue messages sent above and add each one as a row in the sdb-domain
-    (with-aws sdb sqs
+    (with-aws :sdb :sqs
       (with-queue "bucketlist" 
     	(with-domain :workspace
     	  (doseq [msg (take-while (comp not false?) (repeatedly #(dequeue 5)))]
     		 (add-attributes msg {:type "testing bucket"})))))
     
     ; select all rows and attibutes from domain
-    (with-aws sdb (select "* from workspace"))
+    (with-aws :sdb (select "* from workspace"))
     
     
     ; Upload an image and a string to mybucket. Then make the string
     ; publicly available on http://mybucket.s3.amazonaws.com/foo.txt
     (use 'cljaws.s3)
-    (with-aws s3
+    (with-aws :s3
       (with-bucket "mybucket" 
         (put-object "secretfile.jpg" (java.io.File. "cute.jpg"))
         (put-object "foo.txt" "hello world!")
         (grant "foo.txt" {:all-users :read})))
     
     
-## Commands
-    
-    (with-aws services?+ &body) 
-        
-    Read credentials from aws.properties and connect to services
-    
-    
-    (with-s3 &body) 
-    Connect to s3-service
-    
-    
-    (with-ec2 &body) 
-    Connect to ec2-service
-    
-    
-    (with-sqs &body) 
-    Connect to sqs-service and queue
-    
-    
-    (with-sdb &body) 
-    Connect to sdb-service
-
-
 
 ## License
 
  Copyright (c) 2010 Tobias Löfgren (contact@tobiaslofgren.com)
+
+ MIT-style license:
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation

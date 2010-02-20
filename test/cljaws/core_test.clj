@@ -42,12 +42,12 @@
   
   (is (unbound? cljaws.s3/*s3-service*))
 
-  (with-aws s3
+  (with-aws :s3
     (is (not (unbound? cljaws.s3/*s3-service*))))
   
   (is (unbound? cljaws.s3/*s3-service*))
   (is (unbound? cljaws.sdb/*sdb-service*))
   
-  (with-aws s3 sdb 
+  (with-aws :s3 :sdb 
     (is (not (unbound? cljaws.s3/*s3-service*)))
     (is (not (unbound? cljaws.sdb/*sdb-service*)))))

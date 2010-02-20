@@ -6,7 +6,7 @@
 
 (deftest list-domains-test
   (let [domain-name (make-unique-name "domain")]
-    (with-aws sdb
+    (with-aws :sdb
       (create-domain domain-name)
 	
       (let [result (list-domains)]

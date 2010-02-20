@@ -8,25 +8,19 @@
 
 (deftest buckets-test
   (let [bucket-name (make-unique-name "bucket")]
-    (with-aws 
-      (with-s3 
-
+    (with-aws :s3
 	; create bucket
-
 	(with-bucket bucket-name
 
 	  ; verify that it exists
-
 	  (is (while-or-timeout 
 	       false? timeout-seconds 
 	       (contains-string? (list-buckets) bucket-name)))
 
 	  ; put a simple textobject
-
 	  (put-object "testing" "Hello World!")
 
 	  ; verify it exists
-
 	  (is (while-or-timeout
 	       false? timeout-seconds
 	       (= "Hello World!" (get-object-as-string "testing"))))
@@ -37,7 +31,6 @@
 
 
 	  ; create a file and put it
-
 	  (let [file (java.io.File/createTempFile "CLJAWS_test" ".html")
 		test-content "<html><head><title>Hello</title></head>
 <body><h1>Hello world!</h1></body></html>"]
@@ -47,7 +40,6 @@
 	    (put-object "test.html" file)
 
 	  ; verify it exists
-	    
 	    (is (while-or-timeout
 		 false? timeout-seconds
 		 (= "test.html" (:key (get-object-details "test.html")))))
@@ -56,29 +48,25 @@
 	      (is (= 2 (count content))))
 
 	    ; delete them
-
 	    (delete-object "test.html"))
 	  (delete-object "testing")
 	  
 	  ; verify they're gone
-
 	  (is (while-or-timeout 
 	       false? timeout-seconds
 	       (zero? (count (list-bucket)))))
 
 	  ; delete bucket
-
 	  (delete-bucket))
 
 	; verify the bucket is gone
-
 	(is (while-or-timeout
 	     false? timeout-seconds
-	     (not (contains-string? (list-buckets) bucket-name))))))))
+	     (not (contains-string? (list-buckets) bucket-name)))))))
 
 (deftest fail-test
     (let [bucket-name (make-unique-name "bucket")]
-    (with-aws s3
+    (with-aws :s3
       (with-bucket bucket-name
 	(is (nil? (delete-object "This_doesnt_exist")))
 	(is (nil? (get-object-details "This_doesnt_exits_either")))
