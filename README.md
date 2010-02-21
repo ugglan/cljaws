@@ -45,18 +45,16 @@ be very readable so here is some example usage:
     ; enqueue the names of all my s3-buckets as a message in queue "bucketlist"
     (use '(cljaws core s3 sqs))
     
-    (with-aws :sqs
+    (with-aws :sqs :s3
       (with-queue :bucketlist
-        (doseq [bucket-name (with-s3 (list-buckets))]
+        (doseq [bucket-name (list-buckets)]
     	   (enqueue bucket-name))))
     
     
-    (use '(cljaws sdb helpers))
-    
-    ; create sdb domain
-    (with-aws :sdb (create-domain :workspace))
+    (use '(cljaws sdb)
     
     ; dequeue messages sent above and add each one as a row in the sdb-domain
+    ; both the queue and the domain will be automatically created as needed
     (with-aws :sdb :sqs
       (with-queue :bucketlist 
     	(with-domain :workspace
@@ -65,7 +63,7 @@ be very readable so here is some example usage:
     
     ; select all rows and attibutes from domain
     (with-aws :sdb (select "* from workspace"))
-    
+
     
     ; Upload an image and a string to mybucket. Then make the string
     ; publicly available on http://mybucket.s3.amazonaws.com/foo.txt
