@@ -70,7 +70,7 @@
       (with-bucket (keyword bucket-name)
 	(is (nil? (delete-object "This_doesnt_exist")))
 	(is (nil? (get-object-details "This_doesnt_exits_either")))
-	(is (nil? (get-object "This_doesnt_exits_either")))
+	(is (nil? (get-object* "This_doesnt_exits_either")))
 	(is (nil? (get-object-as-string "This_doesnt_exits_either")))
 	(is (nil? (get-object-as-stream "This_doesnt_exits_either")))
 	(delete-bucket)))))

@@ -13,16 +13,13 @@ I have no ambitions to completely hide the innards of the parent
 libraries because sometimes I might want to work with the
 Java-objects.
 
-The API will very likely change, at the moment it might be a bit
-binding/with-happy and it's a bit inconsistent in when it will return
-a Java-object and when it will wrap it in (bean ..).
-
+The API will very likely keep changing for some time.
 
 
 ## Installation
 
-cljaws uses the leiningen build tool, get it at
-http://github.com/technomancy/leiningen if you don't have it!
+cljaws uses the leiningen build tool, [get it](http://github.com/technomancy/leiningen) 
+if you don't have it!
 
 
 1. Clone the repo
@@ -35,7 +32,8 @@ http://github.com/technomancy/leiningen if you don't have it!
 As an alternative to creating aws.properties you can use
 `(with-aws-keys ID KEY ....)` but I don't recommended it.
 
-Optional 4. Run `lein test`
+Optional 4. Run `lein test` Note: as AWS doesn't guarantee how long it takes
+for modifications to be available, some test may fail occasionally.
 
 
 ## Usage 
@@ -78,7 +76,7 @@ be very readable so here is some example usage:
         (put-object "foo.txt" "hello world!")
         (grant "foo.txt" {:all-users :read})))
     
-    
+
 
 ## License
 

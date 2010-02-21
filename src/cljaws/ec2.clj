@@ -8,6 +8,8 @@
 ;;
 
 
-(defn list-ec2-images [] 
+(defn list-ec2-images 
+  "Returns a sequence of maps containing information about all available EC2 images."
+  [] 
   (let [ec2 (Jec2. *aws-id* *aws-key*)]
     (map bean (.describeImages ec2 '()))))

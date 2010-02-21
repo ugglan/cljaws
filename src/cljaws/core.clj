@@ -17,9 +17,13 @@ just pass through if already string"
 ;; Generic aws
 ;;
 
-(def *aws-properties-file* "aws.properties")
+(def #^{:doc "File name to read AWS keys from." }
+     *aws-properties-file* "aws.properties")
 
-(defmacro with-aws-keys [id key & body]
+(defmacro with-aws-keys 
+  "Setup aws with specified credentials, doesn't take service args. 
+To use services use individual (with-sdb ...) etc."
+  [id key & body]
   `(binding [*aws-id* ~id
 	     *aws-key* ~key]
      ~@body))
@@ -30,7 +34,8 @@ just pass through if already string"
 	  (.load (java.io.FileInputStream. file-name)))))
 	
 (defmacro with-aws
-  "Load credentials and setup specfied services."
+  "Load credentials and setup specfied services. 
+Example: (with-aws :s3 :sdb ...)"
   {:arglists '([service?+  & body])}  
   [& body]
   (let [{:strs [id key]} (read-properties *aws-properties-file*)
