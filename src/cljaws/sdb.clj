@@ -59,13 +59,39 @@ doesn't exist, it will be created when needed, but not until then."
   [id]
   (.deleteItem *sdb-domain* (to-str id)))
 
+(defn- splitter [[a b]]
+  (map #(vector a %) b))
+
+(defn- transform-attributes [attrs replace]
+  (->> (map #(vector (key %) (ensure-vector (val %))) attrs)
+       (mapcat splitter)
+       (map #(ItemAttribute. (to-str (first %))
+			     (str (second %)) replace))))
+
+
+(defn batch-add-attributes
+  "Batch add a map of items and attributes on the form {item {attr val}, item2 {attr val, attr2 [val1 val2]}}."
+  [id-attrs-map]
+  (loop [remaining id-attrs-map
+	 res []]
+    (let [[current remaining] (split-at 25 remaining)
+	  items (into {} (map #(vector
+				(to-str (first %))
+				(transform-attributes (second %) false))
+			      current))]
+      (if (empty? items)
+	(map bean res)
+	(recur remaining
+	       (cons (retry-if-no-domain
+		      (.batchPutAttributes *sdb-domain* items)) res))))))
+
+
 (defn- update-attributes [id attrs replace]
-  (let [attributes (map #(ItemAttribute. (to-str (first %))
-					 (str (second %)) replace)
-			attrs)]
-    (retry-if-no-domain
-     (.putAttributes
-      (get-item* id) attributes))))
+  (let [attributes (transform-attributes attrs replace)]
+    (bean (retry-if-no-domain
+	   (.putAttributes
+	    (get-item* id) attributes)))))
+
 
 (defn add-attributes
   "Add all attributes in the map attrs to the item id."
@@ -84,7 +110,7 @@ doesn't exist, it will be created when needed, but not until then."
 	 (map? attrs) (map #(ItemAttribute. (to-str (first %)) nil true) attrs)
 	 :else (list (ItemAttribute. (to-str attrs) nil true)))]
     (if (not-empty attr-list)
-      (.deleteAttributes (get-item* id) attr-list))))
+      (bean (.deleteAttributes (get-item* id) attr-list)))))
 
 
 (defn- convert-attr-list [attr-list]
