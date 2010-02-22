@@ -115,15 +115,10 @@ Example: {:a {:b 1 :c 2} :e {:f [3 4]} turns into
   (binding [*sdb-domain* domain
 	    *sdb-service* service]
     (->>
-     (loop [result []]
-       (let [items (prepare-batchput-map
-		    (take 25 (swap! id-attrs-seq #(drop 25 %))))]
-	 (if (empty? items)
-	   result
-	   (recur (conj result
-			(retry-if-no-domain
-			 (.batchPutAttributes domain items)))))))
-     (map #(select-keys (bean %) [:boxUsage :requestId]))
+     (repeatedly (fn [] (take 25 (swap! id-attrs-seq #(drop 25 %)))))
+     (take-while not-empty)
+     (mapcat batch-add-attributes)
+     (doall)
      (swap! all-results conj))))
 
 
@@ -147,17 +142,19 @@ Example: {:a {:b 1 :c 2} :e {:f [3 4]} turns into
   "Batch add a map of items and attributes on the form {item {attr
 val}, item2 {attr val, attr2 [val1 val2]}}. An optional integer argument
 greater than 1 specifies the size of a thread pool that will do the work."
+
   ([n id-attrs-seq]
      (cond
       (= 1 n) (batch-add-attributes id-attrs-seq)
       (pos? n) (multi-batch-add-attributes n id-attrs-seq)))
+
   ([id-attrs-seq]
-     (map #(select-keys (bean %) [:boxUsage :requestId])
-	  (doall
-	   (for [part (partition-all 25 id-attrs-seq)]
-	     (let [items (prepare-batchput-map part)]
-	       (retry-if-no-domain
-		(.batchPutAttributes *sdb-domain* items))))))))
+     (->> (partition-all 25 id-attrs-seq)
+	  (map prepare-batchput-map)
+	  (map #(retry-if-no-domain
+		 (.batchPutAttributes *sdb-domain* %)))
+	  (doall)
+	  (map #(select-keys (bean %) [:boxUsage :requestId])))))
 
 
 ; Single-item update tools
