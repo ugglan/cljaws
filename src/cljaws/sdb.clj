@@ -1,5 +1,6 @@
 (ns cljaws.sdb
-  (:use (cljaws core helpers))
+  (:use [cljaws core helpers]
+        [clojure.contrib.seq-utils :only [partition-all]])
   (:import
    (com.xerox.amazonws.sdb Domain Item SimpleDB QueryResult
 			   ItemAttribute SDBException )))
@@ -72,23 +73,24 @@ Example: {:a {:b 1 :c 2} :e {:f [3 4]} turns into
        (map #(ItemAttribute. (to-str (first %))
 			     (str (second %)) replace))))
 
+(defn- prepare-batchput-map
+  "Prepare sequence into a map of String->[ItemAttributes] that batchPutAttr wants"
+  [id-attrs-seq]
+  (into {} (map #(vector
+		  (to-str (first %))
+		  (transform-attributes (second %) false))
+		id-attrs-seq)))
 
 (defn batch-add-attributes
   "Batch add a map of items and attributes on the form {item {attr
 val}, item2 {attr val, attr2 [val1 val2]}}."
-  [id-attrs-map]
-  (loop [remaining id-attrs-map
-	 res []]
-    (let [[current remaining] (split-at 25 remaining)
-	  items (into {} (map #(vector
-				(to-str (first %))
-				(transform-attributes (second %) false))
-			      current))]
-      (if (empty? items)
-	(map bean res)
-	(recur remaining
-	       (conj (retry-if-no-domain
-		      (.batchPutAttributes *sdb-domain* items)) res))))))
+  [id-attrs-seq]
+  (map #(select-keys (bean %) [:boxUsage :requestId])
+       (doall
+	(for [part (partition-all 25 id-attrs-seq)]
+	  (let [items (prepare-batchput-map part)]
+	    (retry-if-no-domain
+	     (.batchPutAttributes *sdb-domain* items)))))))
 
 
 (defn- update-attributes [id attrs replace]
