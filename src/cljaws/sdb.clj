@@ -62,7 +62,11 @@ doesn't exist, it will be created when needed, but not until then."
 (defn- splitter [[a b]]
   (map #(vector a %) b))
 
-(defn- transform-attributes [attrs replace]
+(defn- transform-attributes
+  "Takes a sequence item-maps and transforms them to individual ItemAttributes.
+Example: {:a {:b 1 :c 2} :e {:f [3 4]} turns into
+         {a (IA(b,1), IA(c,2)) e (IA(f,3), IA(f,4))}"
+  [attrs replace]
   (->> (map #(vector (key %) (ensure-vector (val %))) attrs)
        (mapcat splitter)
        (map #(ItemAttribute. (to-str (first %))
@@ -70,7 +74,8 @@ doesn't exist, it will be created when needed, but not until then."
 
 
 (defn batch-add-attributes
-  "Batch add a map of items and attributes on the form {item {attr val}, item2 {attr val, attr2 [val1 val2]}}."
+  "Batch add a map of items and attributes on the form {item {attr
+val}, item2 {attr val, attr2 [val1 val2]}}."
   [id-attrs-map]
   (loop [remaining id-attrs-map
 	 res []]
@@ -82,7 +87,7 @@ doesn't exist, it will be created when needed, but not until then."
       (if (empty? items)
 	(map bean res)
 	(recur remaining
-	       (cons (retry-if-no-domain
+	       (conj (retry-if-no-domain
 		      (.batchPutAttributes *sdb-domain* items)) res))))))
 
 
