@@ -124,12 +124,24 @@ doesn't exist, it will be created when needed, but not until then."
   (convert-attr-list
    (retry-if-no-domain (.getAttributes (get-item* id)))))
 
+(defn- lazy-select
+  ([domain query] (lazy-select domain query nil))
+  ([domain query next-token]
+     (let [res (.selectItems domain query next-token)
+	   items (.getItems res)
+	   next-token (.getNextToken res)]
+       (if (nil? next-token)
+	 items
+	 (lazy-seq
+	  (concat items
+		  (lazy-select domain query next-token)))))))
+
 (defn select
-  "Run select with the specified query, returns a sequence of results."
+  "Run select with the specified query, returns a lazy sequence of results."
   [query]
   (map #(vector (keyword (.getKey %))
 		(convert-attr-list (.getValue %)))
-       (.getItems (.selectItems *sdb-domain* (str "select " query) nil))))
+       (lazy-select *sdb-domain*  (str "select " query))))
 
 (defn create-domain
   "Explicitly create the specified domain. Ususally you will just
