@@ -12,7 +12,17 @@
 (defn make-unique-name [type]
   (str "CLJAWS-test-" type  "-" (System/currentTimeMillis) (rand-int 100000000)))
 
-(defmacro probe 
+
+(def *progress-counter* (atom 0))
+
+(defn reset-progress []
+  (reset! *progress-counter* 0))
+
+(defmacro progress [& body]
+  `(do (println "Call nr" (swap! *progress-counter* inc))
+       ~@body))
+
+(defmacro probe
   "Print out an optional label and the result from body and then return it unaffected."
   {:arglists '([label? & body])}
   [& body]
@@ -30,7 +40,7 @@
 
 
 (defmacro unbound? [symbol]
-  `(= :unbound 
+  `(= :unbound
       (try ~symbol
 	   (catch IllegalStateException e# :unbound))))
 
@@ -39,15 +49,15 @@
   (is (unbound? *aws-id*))
   (with-aws
     (is (string? *aws-id*)))
-  
+
   (is (unbound? cljaws.s3/*s3-service*))
 
   (with-aws :s3
     (is (not (unbound? cljaws.s3/*s3-service*))))
-  
+
   (is (unbound? cljaws.s3/*s3-service*))
   (is (unbound? cljaws.sdb/*sdb-service*))
-  
-  (with-aws :s3 :sdb 
+
+  (with-aws :s3 :sdb
     (is (not (unbound? cljaws.s3/*s3-service*)))
     (is (not (unbound? cljaws.sdb/*sdb-service*)))))
