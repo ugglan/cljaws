@@ -1,4 +1,4 @@
-(defproject cljaws "0.2.3-SNAPSHOT"
+(defproject cljaws "0.2.4-SNAPSHOT"
   :description "Clojure wrapper for Amazon Web Services"
   :dependencies [[org.clojure/clojure "1.1.0"]
                  [org.clojure/clojure-contrib "1.1.0"]

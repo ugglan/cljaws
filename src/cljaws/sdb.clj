@@ -179,7 +179,7 @@ greater than 1 specifies the size of a thread pool that will do the work."
   (let [attr-list
 	(cond
 	 (vector? attrs) (map #(ItemAttribute. (to-str %) nil true) attrs)
-	 (map? attrs) (map #(ItemAttribute. (to-str (first %)) nil true) attrs)
+	 (map? attrs) (transform-attributes attrs true)
 	 :else (list (ItemAttribute. (to-str attrs) nil true)))]
     (if (not-empty attr-list)
       (bean (.deleteAttributes (get-item* id) attr-list)))))
